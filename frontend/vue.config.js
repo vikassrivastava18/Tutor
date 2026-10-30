@@ -2,11 +2,40 @@ const path = require('path')
 const webpack = require('webpack')
 const CopyPlugin = require('copy-webpack-plugin')
 const { defineConfig } = require('@vue/cli-service')
+const wasmerSdkDist = path.dirname(require.resolve('@wasmer/sdk/browser'))
+const wasmerSdkPkg = path.resolve(wasmerSdkDist, '..', 'pkg')
 
 module.exports = defineConfig({
   transpileDependencies: true,
   devServer: {
     port: 8080,
+    static: { directory: path.resolve(__dirname, 'public') },
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
+    setupMiddlewares: (middlewares) => {
+      const serveStatic = require('express').static
+      const setIsolationHeaders = (response) => {
+        response.setHeader('Cross-Origin-Opener-Policy', 'same-origin')
+        response.setHeader('Cross-Origin-Embedder-Policy', 'require-corp')
+        response.setHeader('Cross-Origin-Resource-Policy', 'same-origin')
+      }
+
+      middlewares.unshift(
+        {
+          name: 'wasmer-sdk-dist',
+          path: '/wasmer-sdk/dist',
+          middleware: serveStatic(wasmerSdkDist, { setHeaders: setIsolationHeaders }),
+        },
+        {
+          name: 'wasmer-sdk-pkg',
+          path: '/wasmer-sdk/pkg',
+          middleware: serveStatic(wasmerSdkPkg, { setHeaders: setIsolationHeaders }),
+        },
+      )
+      return middlewares
+    },
   },
   chainWebpack: (config) => {
     config.module.rule('js').exclude.add(
@@ -34,6 +63,14 @@ module.exports = defineConfig({
       }),
       new CopyPlugin({
         patterns: [
+          {
+            from: wasmerSdkDist,
+            to: 'wasmer-sdk/dist',
+          },
+          {
+            from: wasmerSdkPkg,
+            to: 'wasmer-sdk/pkg',
+          },
           {
             from: path.resolve(
               path.dirname(require.resolve('pyodide/package.json')),

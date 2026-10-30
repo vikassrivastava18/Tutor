@@ -1,7 +1,6 @@
 import './assets/base.css'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
-// import axios from 'axios'
 import { createWebHistory, createRouter } from 'vue-router'
 import { createApp } from 'vue'
 
@@ -46,6 +45,11 @@ const routes = [
         component: () => import('./views/python/components/QuizComponent.vue')
       }
     ]
+  },
+  {
+    path: '/c',
+    name: 'c-compiler',
+    component: () => import('./views/c/ClangView.vue')
   }
 ]
 

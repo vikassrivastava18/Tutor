@@ -8,10 +8,11 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@wasmer/sdk": "^0.19.1",
     "bootstrap": "^5.3.8",
     "core-js": "^3.8.3",
     "marked": "^18.0.11",
-    "pyodide": "^314.0.6",
+    "pyodide": "^314.0.7",
     "vue": "^3.2.13",
     "vue-router": "^5.0.4"
   },

@@ -12,7 +12,13 @@
                 class="nav-link text_white px-4 py-1 me-2" 
                 :class="{ 'python-active': $route.fullPath.includes('python') }">
                 PYTHON
-            </router-link>         
+             </router-link>
+             <router-link
+                 :to="{ name: 'c-compiler' }"
+                 class="nav-link text_white px-4 py-1 me-2"
+                 :class="{ 'c-active': $route.name === 'c-compiler' }">
+                 C
+             </router-link>
         </div>
     </nav>
 </template>
@@ -31,7 +37,7 @@
         color: #000;
     }
 
-    .router-link-exact-active, .router-link-active, .python-active {
+    .router-link-exact-active, .router-link-active, .python-active, .c-active {
         background-color: #7ef473;
         border: none;
         color: #000;
