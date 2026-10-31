@@ -1,6 +1,6 @@
-# Shreyas
+# Tutor
 
-Shreyas is an educational platform focused primarily on computer science topics. The project aims to combine curated learning content, interactive tutoring, quizzes, and coding exercises into a single learning experience.
+Tutor is an educational platform focused primarily on computer science topics. Built for CS50, the project aims to combine curated learning content, interactive tutoring, and coding exercises into a single learning experience.
 
 ## Overview
 

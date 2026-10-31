@@ -129,9 +129,9 @@ async function executeCode() {
 </script>
 
 <style scoped>
-.clang-view {
+/* .clang-view {
   max-width: 960px;
-}
+} */
 
 .eyebrow {
   color: #198754;
