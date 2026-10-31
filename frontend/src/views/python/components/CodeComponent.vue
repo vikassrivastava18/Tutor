@@ -145,6 +145,7 @@ onMounted(async () => {
     loadProblem(problem);
   } catch (error) {
     console.error("Failed to load code snippet:", error);
+    question.value = "Failed to load code snippet, please try again later.";
   } finally {
     loading.value = false
   }

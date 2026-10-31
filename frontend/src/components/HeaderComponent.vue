@@ -1,6 +1,6 @@
 <template>
     <!-- Application header and logo. -->
-    <div class="head-section text-center" id="headerContainer">
+    <div class="head-section" id="headerContainer">
         <div class="logobrand">
             <h2 style="display: inline;">
                 <img src="../assets/duck.jpg" alt="Logo" width="60" /> TUTOR &nbsp;

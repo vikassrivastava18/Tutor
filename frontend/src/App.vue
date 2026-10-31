@@ -1,15 +1,17 @@
 <template>
     <main>
-        <div class="container my-2" id="mainContent">
+        <div class="container my-2">
             <div class="innerContainer p-2">
-                <header>
-                    <HeaderComponent />                    
-                </header>
+                <div class="d-flex align-items-center justify-content-between gap-3">
+                    <header>
+                        <HeaderComponent />
+                    </header>
 
-                <NavComponent />
+                    <NavComponent />
+                </div>
 
                 <div class="tab-content mt-2" id="routeContent">
-                    <RouterView />                  
+                    <RouterView />
                 </div>
             </div>
         </div>
@@ -24,25 +26,16 @@ import NavComponent from './components/NavComponent.vue';
 </script>
 
 <style scoped>
-    #mainContent {
-        background: white;
-        border: 1px dotted #dfdfdf;
-        border-radius: 10px;
-        height: 100%;         
-    }
-
-    #mainContent {
-        min-height: 100vh;
-    }
 
     h2, h3, h4 {
         font-weight: 400;
     }
 
     #routeContent {
-        border: 1px dotted #4d4a4a;
+        border: 1px solid #d1d5db;
         border-radius: 10px;
-        min-height: 80vh;
+        min-height: 90vh;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     }
 
 </style>
