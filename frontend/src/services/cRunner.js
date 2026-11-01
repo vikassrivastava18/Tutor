@@ -3,7 +3,7 @@
 const CLANG_PACKAGE = "clang/clang@=0.160000.1";
 const OUTPUT_LIMIT = 64 * 1024;
 const COMPILE_TIMEOUT_MS = 60_000;
-const PROGRAM_TIMEOUT_MS = 10_000;
+const PROGRAM_TIMEOUT_MS = 60_000;
 
 let wasmerPromise;
 let clangPackagePromise;
@@ -39,7 +39,11 @@ function getClangPackage(wasmer, onProgress) {
   return clangPackagePromise;
 }
 
-export async function compileAndRunC(source, onStatus = () => {}) {
+export async function compileAndRunC(
+  source,
+  onStatus = () => {},
+  onOutput = () => {},
+) {
   if (globalThis.crossOriginIsolated !== true) {
     throw new Error(
       "The C compiler requires cross-origin isolation. Configure the frontend to send " +
@@ -66,6 +70,8 @@ export async function compileAndRunC(source, onStatus = () => {}) {
     files: { "hello.c": source },
   });
 
+  let closeSandbox = true;
+
   try {
     onStatus("Compiling C to WebAssembly...");
     const compilation = await sandbox
@@ -90,22 +96,76 @@ export async function compileAndRunC(source, onStatus = () => {}) {
     const program = await sandbox.installPackage(
       await sandbox.fs.readFile("hello.wasm"),
     );
-    const execution = await sandbox
+    const process = await sandbox
       .command(program)
-      .run({
-        check: false,
+      .spawn({
+        terminal: { columns: 80, rows: 24 },
         timeoutMs: PROGRAM_TIMEOUT_MS,
         outputBytes: OUTPUT_LIMIT,
       });
 
+    if (!process.stdin || !process.stdout || !process.stderr) {
+      throw new Error("The C program's input and output streams are unavailable.");
+    }
+
+    let stdout = "";
+    let stderr = "";
+    const readStream = async (stream, name) => {
+      const decoder = new TextDecoder();
+
+      for await (const chunk of stream) {
+        const text = decoder.decode(chunk, { stream: true });
+        if (name === "stdout") {
+          stdout += text;
+        } else {
+          stderr += text;
+        }
+        onOutput(name, text);
+      }
+
+      const remaining = decoder.decode();
+      if (remaining) {
+        if (name === "stdout") {
+          stdout += remaining;
+        } else {
+          stderr += remaining;
+        }
+        onOutput(name, remaining);
+      }
+    };
+
+    const completion = (async () => {
+      try {
+        const streamReaders = [
+          readStream(process.stdout, "stdout"),
+          readStream(process.stderr, "stderr"),
+        ];
+        const execution = await process.wait({ check: false });
+        await Promise.all(streamReaders);
+
+        return {
+          stage: "run",
+          exitCode: execution.exitCode,
+          reason: execution.reason,
+          stdout,
+          stderr,
+        };
+      } finally {
+        await sandbox.close();
+      }
+    })();
+
+    closeSandbox = false;
+
     return {
       stage: "run",
-      exitCode: execution.exitCode,
-      reason: execution.reason,
-      stdout: execution.stdout.text(),
-      stderr: execution.stderr.text(),
+      sendInput: (text) => process.stdin.write(text),
+      closeInput: () => process.stdin.close(),
+      completion,
     };
   } finally {
-    await sandbox.close();
+    if (closeSandbox) {
+      await sandbox.close();
+    }
   }
 }

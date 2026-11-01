@@ -43,24 +43,69 @@
 
     <section class="card output-card mt-4" aria-labelledby="output-heading">
       <div class="card-header fw-semibold" id="output-heading">Output</div>
-      <pre class="output-panel mb-0" aria-live="polite">{{ output || "Run the sample to see its output here." }}</pre>
+      <pre class="output-panel mb-0" aria-live="polite">{{ output || (running ? "Program is running..." : "Run the sample to see its output here.") }}</pre>
+      <div v-if="programSession" class="card-body border-top">
+        <label class="form-label" for="c-runtime-input">Program input</label>
+        <div class="d-flex gap-2">
+          <input
+            id="c-runtime-input"
+            v-model="runtimeInput"
+            class="form-control"
+            type="text"
+            placeholder="Type input and press Enter"
+            :disabled="inputClosed"
+            @keydown.enter.prevent="sendProgramInput"
+          />
+          <button
+            class="btn btn-primary"
+            :disabled="inputClosed"
+            @click="sendProgramInput"
+          >
+            Send
+          </button>
+          <button
+            class="btn btn-outline-secondary text-nowrap"
+            :disabled="inputClosed"
+            @click="finishProgramInput"
+          >
+            Finish input
+          </button>
+        </div>
+        <div class="form-text">
+          Input is sent to the running program when you press Enter or Send.
+        </div>
+      </div>
     </section>
   </section>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, shallowRef } from "vue";
 import { compileAndRunC } from "../../services/cRunner";
 
 const code = ref(`#include <stdio.h>
 
-int main(void) {
-    printf("Hello, World!\\n");
+int main() {
+    int userNumber;
+
+    printf("Enter an integer: ");
+    fflush(stdout);
+
+    if (scanf("%d", &userNumber) != 1) {
+        fprintf(stderr, "Please provide a valid integer.\\n");
+        return 1;
+    }
+
+    printf("You entered: %d\\n", userNumber);
+
     return 0;
 }`);
 const output = ref("");
 const status = ref("Ready");
 const running = ref(false);
+const programSession = shallowRef(null);
+const runtimeInput = ref("");
+const inputClosed = ref(false);
 
 function insertIndentation(event) {
   const textarea = event.target;
@@ -79,51 +124,87 @@ function insertIndentation(event) {
 async function executeCode() {
   running.value = true;
   output.value = "";
+  programSession.value = null;
+  runtimeInput.value = "";
+  inputClosed.value = false;
 
   try {
-    const result = await compileAndRunC(code.value, (message) => {
-      status.value = message;
-    });
-    const messages = [];
+    const result = await compileAndRunC(
+      code.value,
+      (message) => {
+        status.value = message;
+      },
+      (stream, text) => {
+        if (stream === "stderr" && !output.value.includes("Standard error:\n")) {
+          output.value += "Standard error:\n";
+        }
+        output.value += text;
+      },
+    );
 
-    if (result.stdout) {
-      messages.push(result.stdout);
-    }
-    if (result.stderr) {
-      messages.push(
-        `${result.stage === "compile" ? "Compiler diagnostics" : "Standard error"}:\n${result.stderr}`,
-      );
-    }
-
-    if (result.reason === "timeout") {
+    if (result.stage === "compile") {
+      if (result.stdout) {
+        output.value += result.stdout;
+      }
+      if (result.stderr) {
+        output.value += `Compiler diagnostics:\n${result.stderr}`;
+      }
       status.value =
-        result.stage === "compile"
+        result.reason === "timeout"
           ? "Compilation timed out."
-          : "Program stopped after the 10-second time limit.";
-      messages.push(status.value);
-    } else if (
-      result.stage === "compile" &&
-      (result.exitCode !== 0 || result.reason !== "exited")
-    ) {
-      status.value = "Compilation failed.";
-      messages.push(
-        `Compiler ${result.reason} with code ${result.exitCode}.`,
-      );
-    } else if (result.exitCode !== 0 || result.reason !== "exited") {
-      status.value = `Program ${result.reason} with code ${result.exitCode}.`;
-      if (messages.length === 0) {
-        messages.push(status.value);
+          : "Compilation failed.";
+      return;
+    }
+
+    programSession.value = result;
+    status.value = "Program is running. Enter input when prompted.";
+    const execution = await result.completion;
+
+    if (execution.reason === "timeout") {
+      status.value = "Program stopped after the 60-second time limit.";
+      output.value += `\n${status.value}`;
+    } else if (execution.exitCode !== 0 || execution.reason !== "exited") {
+      status.value = `Program ${execution.reason} with code ${execution.exitCode}.`;
+      if (output.value.length === 0) {
+        output.value = status.value;
       }
     } else {
       status.value = "Program finished successfully.";
     }
-
-    output.value = messages.join("\n").trimEnd();
   } catch (error) {
     status.value = "Unable to compile or run the program.";
-    output.value = error instanceof Error ? error.message : String(error);
+    output.value += error instanceof Error ? error.message : String(error);
   } finally {
+    programSession.value = null;
     running.value = false;
+  }
+}
+
+async function sendProgramInput() {
+  if (!programSession.value || inputClosed.value) {
+    return;
+  }
+
+  try {
+    await programSession.value.sendInput(`${runtimeInput.value}\n`);
+    runtimeInput.value = "";
+  } catch (error) {
+    status.value = "Unable to send input to the running program.";
+    output.value += error instanceof Error ? error.message : String(error);
+  }
+}
+
+async function finishProgramInput() {
+  if (!programSession.value || inputClosed.value) {
+    return;
+  }
+
+  try {
+    await programSession.value.closeInput();
+    inputClosed.value = true;
+  } catch (error) {
+    status.value = "Unable to finish program input.";
+    output.value += error instanceof Error ? error.message : String(error);
   }
 }
 </script>
