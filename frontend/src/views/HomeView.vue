@@ -1,7 +1,7 @@
 <template>
 
   <!-- Introductory content for the tutor application. -->
-  <section class="py-5">
+  <section class="py-4">
     <div class="container">
       <div class="row g-5">
 
@@ -23,7 +23,7 @@
           <p class="text-white fs-5 lh-lg mb-4">
             <i>Tutor</i> is an educational application designed to support students taking CS50. Learn, ask questions, write code, and keep trying until you get it right.
             <br>Ask the friendly tutor duck for guidance.
-            <br>Need help with a coding challenge? Request a hint—but remember, copying and pasting solutions isn't allowed.
+            <br>Need help with a coding challenge? Request tutor duck for a hint.<br>But remember, copying and pasting solutions isn't allowed.
           </p>
         </div>
       </div>
