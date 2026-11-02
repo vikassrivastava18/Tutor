@@ -89,10 +89,9 @@ int main() {
     int userNumber;
 
     printf("Enter an integer: ");
-    fflush(stdout);
 
     if (scanf("%d", &userNumber) != 1) {
-        fprintf(stderr, "Please provide a valid integer.\\n");
+        printf(stderr, "Please provide a valid integer.\\n");
         return 1;
     }
 

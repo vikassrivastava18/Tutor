@@ -43,6 +43,6 @@ h4 {
     max-width: 85vw;
     margin-inline: auto;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    background-color: black;
+    background-color: #373636;
 }
 </style>

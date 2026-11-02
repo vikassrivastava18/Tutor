@@ -85,7 +85,8 @@
               v-model="expectedAnswer"
               class="form-control"
               rows="4"              
-            ></textarea>
+            >
+          </textarea>
             
           </div>
         </div>

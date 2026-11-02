@@ -10,8 +10,10 @@
     </div>
 </template>
 <style>
+
 #headerContainer {
     background-color: white;
     color: maroon;
 }
+
 </style>

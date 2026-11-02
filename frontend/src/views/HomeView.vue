@@ -7,7 +7,7 @@
 
         <!-- Image Column -->
         <div class="col-lg-6">
-          <img src="../assets/tutor.jpg"
+          <img src="../assets/duck_cs50.png"
             width="600"
             alt="About CS50" class="rounded-4 shadow-lg w-80 mt-0" />
         </div>
@@ -20,12 +20,10 @@
           </h2>
 
           <!-- Paragraph -->
-          <p class="text-secondary fs-5 lh-lg mb-4">
-            <i>Tutor</i> is an AI powered educational playground designed to support student
-            learning. Through a <i>Socratic</i> style conversational interface, students can pose questions, engage in
-            AI-assisted discussions on
-            academic topics, reinforce their understanding through quizzes, and prepare for assessments by responding to
-           practice questions.
+          <p class="text-white fs-5 lh-lg mb-4">
+            <i>Tutor</i> is an educational application designed to support students taking CS50. Learn, ask questions, write code, and keep trying until you get it right.
+            <br>Ask the friendly tutor duck for guidance.
+            <br>Need help with a coding challenge? Request a hint—but remember, copying and pasting solutions isn't allowed.
           </p>
         </div>
       </div>
@@ -36,7 +34,7 @@
 
 <style scoped>
   h2 {
-    color: maroon;
+    color: #dd7c7c;
   }
   .letter-spacing {
     letter-spacing: 1px;
