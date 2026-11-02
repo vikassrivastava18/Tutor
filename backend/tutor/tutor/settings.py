@@ -17,7 +17,6 @@ import environ
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-
 # Initialise environment variables
 env = environ.Env()
 environ.Env.read_env()
@@ -47,7 +46,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'rest_framework',
-    'app'
+    'app',
+    'staff'
 ]
 
 MIDDLEWARE = [

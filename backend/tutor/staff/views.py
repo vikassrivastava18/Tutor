@@ -1,9 +1,18 @@
-from django.shortcuts import render
+import logging
+
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import (SessionAuthentication,
+                                           TokenAuthentication)
 
+from .models import Note, UploadedImage
+from .serializers import (NoteSerializer,
+                          UploadedImageSerializer,
+                          Topic)
 from app.models import SubTopic, Topic
 from .utils import (
     create_coding_problems,
@@ -12,6 +21,9 @@ from .utils import (
     create_topic_summary,
 )
 # Create your views here.
+
+
+logger = logging.getLogger(__name__)
 
 
 class CodingProblemCreateView(APIView):
@@ -68,3 +80,63 @@ class CreateSubTopicView(APIView):
             "summary": summary,
             "subtopics": subtopics,
         })
+
+
+class NoteCreateListView(generics.ListCreateAPIView):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    queryset = Note.objects.all().order_by('-updated_at')
+    serializer_class = NoteSerializer
+
+
+class TopicNotes(generics.ListAPIView):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = NoteSerializer
+
+    def get_queryset(self):
+        topic_id = self.kwargs['topic_id']
+        return (
+            Note.objects
+            .filter(topic=topic_id)
+            .order_by('-updated_at')
+        )
+
+
+class NoteDetailView(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    queryset = Note.objects.all()
+    serializer_class = NoteSerializer
+
+
+class ImageUploadView(APIView):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    # Accepts multipart/form-data with a field 'file'
+    def post(self, request, format=None):
+        try:
+            file_obj = request.FILES.get('file')
+            if not file_obj:
+                return Response({'error': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)
+            img = UploadedImage.objects.create(file=file_obj)
+            serializer = UploadedImageSerializer(img, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        except Exception as e:
+            logger.error(f"Error occurred in image upload: {e}")
+            return Response({'error': 'Image upload failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class TopicListView(generics.ListCreateAPIView):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    queryset = Topic.objects.all()
+    serializer_class = Topic
+
+
+class TopicDetailView(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    queryset = Topic.objects.all()
+    serializer_class = Topic
