@@ -15,15 +15,18 @@
         <!-- Content Column -->
         <div class="col-lg-6">
           <!-- Main Heading -->
-          <h2 class="fw-bold mt-2 mb-4">
+          <h2 class="fw-bold mt-4">
             About
           </h2>
 
           <!-- Paragraph -->
-          <p class="text-white fs-5 lh-lg mb-4">
-            <i>Tutor</i> is an educational application designed to support students taking CS50. Learn, ask questions, write code, and keep trying until you get it right.
+          <p class="text-white fs-5 lh-lg">
+            <i>Tutor</i> is an educational application designed to support CS50 students. 
+            <br>Learn, ask questions, write code, and keep trying until you get it right.
             <br>Ask the friendly tutor duck for guidance.
-            <br>Need help with a coding challenge? Request tutor duck for a hint.<br>But remember, copying and pasting solutions isn't allowed.
+            <br>Need help with a coding challenge? Request tutor duck for a hint.
+            <br>But remember, no shortcuts, copying, pasting acceptable.
+             
           </p>
         </div>
       </div>

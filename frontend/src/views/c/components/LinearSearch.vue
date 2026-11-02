@@ -7,7 +7,7 @@
           <div class="card-body">
             <p class="mb-0 text-white">
               Write a C program that asks the user for an integer, validates the input,
-              and prints the number entered.
+              and searches the number in predefined list.
             </p>
           </div>
         </section>
@@ -103,11 +103,11 @@ int main(void)
     int number;
 
     // Search for number
-    printf("Enter a number to search: \n");
+    printf("Enter a number to search: ");
     fflush(stdout);
 
     if (scanf("%d", &number) != 1) {
-        printf(stderr, "Please provide a valid integer.\\n");
+        printf(stderr, "Please provide a valid integer.");
         return 1;
     }
 
@@ -115,11 +115,11 @@ int main(void)
     {
         if (numbers[i] == number)
         {
-            printf("Found\n");
+            printf("Found");
             return 0;
         }
     }
-    printf("Not found\n");
+    printf("Not found");
     return 1;
 }`);
 const output = ref("");
