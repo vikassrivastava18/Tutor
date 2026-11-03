@@ -23,7 +23,7 @@
               v-model="code"
               class="form-control code-editor"
               spellcheck="false"
-              rows="16"
+              rows="8"
               @keydown.tab.prevent="insertIndentation"
             ></textarea>
 
